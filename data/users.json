@@ -1,0 +1,16 @@
+[
+  {
+    "email": "oreo@gmail.com",
+    "password": "$2a$08$PWZWZSbVRevWUDsWEwoGdOwSDkwWhmxEWBSx60fpBtqzqnlGSZmT.",
+    "name": "oreo",
+    "createdAt": "2025-04-26T20:18:57.439Z",
+    "id": 1
+  },
+  {
+    "email": "Isaacedward2004@gmail.com",
+    "password": "$2a$08$l1NAFYywoHnjsJFiI923qeV1w4CTIfGUXJV8KZJxoW5ZFtHXC1hq2",
+    "name": "oyeyemipelumi",
+    "createdAt": "2025-04-27T18:36:15.968Z",
+    "id": 2
+  }
+]

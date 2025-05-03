@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QRKY - AR Experience Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <div id="app" class="min-h-screen">
+        <!-- Navigation -->
+        <nav class="bg-white shadow-lg">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <h1 class="text-2xl font-bold text-gray-900">QRKY Dashboard</h1>
+                    </div>
+                    <div class="flex items-center">
+                        <span id="userName" class="mr-4 text-gray-600"></span>
+                        <button id="logoutBtn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Create New Experience Button -->
+            <div class="mb-8">
+                <button id="createNewBtn" class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600">
+                    Create New AR Experience
+                </button>
+            </div>
+
+            <!-- Experience List -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="experienceList">
+                <!-- Experiences will be dynamically added here -->
+            </div>
+
+            <!-- Create Experience Modal -->
+            <div id="createModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center">
+                <div class="bg-white rounded-lg p-8 max-w-md w-full">
+                    <h2 class="text-2xl font-bold mb-6">Create New AR Experience</h2>
+                    <form id="createForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Title</label>
+                            <input type="text" name="title" required
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Description (optional)</label>
+                            <textarea name="description" 
+                                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border"
+                                      rows="3"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">3D Model (GLB/GLTF)</label>
+                            <input type="file" name="model" accept=".glb,.gltf" required
+                                   class="mt-1 block w-full p-2">
+                            <p class="text-sm text-gray-500 mt-1">Upload your 3D model file. We'll generate a QR code automatically.</p>
+                        </div>
+                        <div class="flex justify-end space-x-4">
+                            <button type="button" id="cancelCreate"
+                                    class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300">
+                                Cancel
+                            </button>
+                            <button type="submit"
+                                    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                                Create Experience
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Check authentication
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            // Setup event listeners
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                localStorage.removeItem('token');
+                window.location.href = '/login.html';
+            });
+
+            // Show create modal
+            document.getElementById('createNewBtn').addEventListener('click', () => {
+                document.getElementById('createModal').classList.remove('hidden');
+            });
+
+            // Hide create modal
+            document.getElementById('cancelCreate').addEventListener('click', () => {
+                document.getElementById('createModal').classList.add('hidden');
+            });
+
+            // Handle create form submission
+            document.getElementById('createForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                
+                try {
+                    const response = await fetch('/api/experiences', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        document.getElementById('createModal').classList.add('hidden');
+                        loadExperiences(); // Refresh the list
+                    } else {
+                        alert('Failed to create experience');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Failed to create experience');
+                }
+            });
+
+            // Load user's experiences
+            loadExperiences();
+        });
+
+        async function loadExperiences() {
+            try {
+                const response = await fetch('/api/experiences', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const experiences = await response.json();
+                    const experienceList = document.getElementById('experienceList');
+                    experienceList.innerHTML = experiences.length ? experiences.map(experience => `
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-xl font-semibold mb-2">${experience.title}</h3>
+                            <div class="mb-4">
+                                <img src="${experience.qrCodePath}" alt="QR Code" class="w-32 h-32 object-contain">
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="viewExperience('${experience.id}')"
+                                        class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
+                                    View
+                                </button>
+                                <button onclick="editExperience('${experience.id}')"
+                                        class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">
+                                    Edit
+                                </button>
+                            </div>
+                        </div>
+                    `).join('') : '<p class="col-span-3 text-center text-gray-500">No experiences yet. Create one to get started!</p>';
+                }
+            } catch (error) {
+                console.error('Error loading experiences:', error);
+            }
+        }
+
+        function viewExperience(id) {
+            window.open(`/experience.html?id=${id}`, '_blank');
+        }
+
+        function editExperience(id) {
+            window.location.href = `/edit-experience.html?id=${id}`;
+        }
+    </script>
+</body>
+</html> 

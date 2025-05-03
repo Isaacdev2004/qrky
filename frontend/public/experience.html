@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AR Experience Viewer - QRKY</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            font-family: Arial, sans-serif;
+        }
+        .loading-screen .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="loadingScreen" class="loading-screen">
+        <div class="spinner"></div>
+        <div id="loadingText">Loading AR Experience...</div>
+    </div>
+
+    <a-scene
+        embedded
+        arjs='sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;'
+        renderer="logarithmicDepthBuffer: true;"
+        vr-mode-ui="enabled: false">
+
+        <a-marker preset="hiro">
+            <a-entity
+                id="model-entity"
+                position="0 0 0"
+                rotation="0 0 0"
+                scale="1 1 1">
+            </a-entity>
+        </a-marker>
+
+        <a-entity camera></a-entity>
+    </a-scene>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const loadingScreen = document.getElementById('loadingScreen');
+            const loadingText = document.getElementById('loadingText');
+            
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const experienceId = urlParams.get('id');
+                
+                if (!experienceId) {
+                    throw new Error('No experience ID provided');
+                }
+
+                // Fetch experience data
+                const response = await fetch(`/api/experiences/${experienceId}`);
+                if (!response.ok) throw new Error('Failed to load experience');
+                const experience = await response.json();
+
+                // Set up the model
+                const modelEntity = document.getElementById('model-entity');
+                modelEntity.setAttribute('gltf-model', experience.modelPath);
+
+                // Apply settings if they exist
+                if (experience.settings) {
+                    const { scale, rotation, position } = experience.settings;
+                    if (scale) modelEntity.setAttribute('scale', `${scale.x} ${scale.y} ${scale.z}`);
+                    if (rotation) modelEntity.setAttribute('rotation', `${rotation.x} ${rotation.y} ${rotation.z}`);
+                    if (position) modelEntity.setAttribute('position', `${position.x} ${position.y} ${position.z}`);
+                }
+
+                // Hide loading screen when model is ready
+                modelEntity.addEventListener('model-loaded', () => {
+                    loadingScreen.style.display = 'none';
+                });
+
+                // Handle model loading error
+                modelEntity.addEventListener('model-error', (error) => {
+                    console.error('Model Error:', error);
+                    loadingText.textContent = 'Error loading 3D model. Please try again.';
+                });
+
+            } catch (error) {
+                console.error('Error:', error);
+                loadingText.textContent = `Error: ${error.message}. Please refresh the page.`;
+            }
+        });
+    </script>
+</body>
+</html> 
