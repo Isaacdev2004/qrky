@@ -60,18 +60,20 @@ router.post('/', auth, upload.single('model'), async (req, res) => {
             }
         });
 
-        // Generate QR code
-        const baseUrl = `https://${req.hostname}:${process.env.PORT}`;
+        // Generate QR code with proper port
+        const port = process.env.PORT || 3000; // Get port from environment or use default
+        const baseUrl = `https://${req.hostname}:${port}`;
         const qrCodeFileName = `qr-${experience.id}.png`;
         const qrCodePath = `/uploads/qr/${qrCodeFileName}`;
         const qrCodeFullPath = path.join(__dirname, '../uploads/qr', qrCodeFileName);
 
-        // Generate QR code
-        await generateQRCode(experience.id, baseUrl, qrCodeFullPath);
+        // Generate QR code and get the URL
+        const experienceUrl = await generateQRCode(experience.id, baseUrl, qrCodeFullPath);
 
-        // Update experience with QR code path
+        // Update experience with QR code path and URL
         const updatedExperience = await experienceStorage.update(experience.id, {
-            qrCodePath
+            qrCodePath,
+            experienceUrl
         });
 
         res.status(201).send(updatedExperience);

@@ -1,9 +1,9 @@
 [
   {
     "userId": 1,
-    "title": "New",
-    "description": "",
-    "modelPath": "/uploads/models/model-1745699658590-647702753.glb",
+    "title": "good model",
+    "description": "good",
+    "modelPath": "/uploads/models/model-1746309034119-174795539.glb",
     "settings": {
       "scale": {
         "x": 1,
@@ -22,113 +22,8 @@
       }
     },
     "id": 1,
-    "createdAt": "2025-04-26T20:34:18.599Z",
-    "qrCodePath": "/uploads/qr/qr-1.png"
-  },
-  {
-    "userId": 1,
-    "title": "MyModel",
-    "description": "",
-    "modelPath": "/uploads/models/model-1745700840857-275697629.glb",
-    "qrCodePath": null,
-    "targetPath": null,
-    "settings": {
-      "scale": {
-        "x": 1,
-        "y": 1,
-        "z": 1
-      },
-      "rotation": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      },
-      "position": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      }
-    },
-    "id": 2,
-    "createdAt": "2025-04-26T20:54:00.868Z"
-  },
-  {
-    "userId": 1,
-    "title": "MyModel",
-    "description": "",
-    "modelPath": "/uploads/models/model-1745700844711-560316707.glb",
-    "qrCodePath": null,
-    "targetPath": null,
-    "settings": {
-      "scale": {
-        "x": 1,
-        "y": 1,
-        "z": 1
-      },
-      "rotation": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      },
-      "position": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      }
-    },
-    "id": 3,
-    "createdAt": "2025-04-26T20:54:04.718Z"
-  },
-  {
-    "userId": 1,
-    "title": "Mymode",
-    "description": "",
-    "modelPath": "/uploads/models/model-1745701131302-838167372.glb",
-    "settings": {
-      "scale": {
-        "x": 1,
-        "y": 1,
-        "z": 1
-      },
-      "rotation": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      },
-      "position": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      }
-    },
-    "id": 4,
-    "createdAt": "2025-04-26T20:58:51.318Z",
-    "qrCodePath": "/uploads/qr/qr-4.png"
-  },
-  {
-    "userId": 1,
-    "title": "arMODEL",
-    "description": "",
-    "modelPath": "/uploads/models/model-1745703646485-921820640.glb",
-    "settings": {
-      "scale": {
-        "x": 1,
-        "y": 1,
-        "z": 1
-      },
-      "rotation": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      },
-      "position": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      }
-    },
-    "id": 5,
-    "createdAt": "2025-04-26T21:40:46.522Z",
-    "qrCodePath": "/uploads/qr/qr-5.png"
+    "createdAt": "2025-05-03T21:50:34.131Z",
+    "qrCodePath": "/uploads/qr/qr-1.png",
+    "experienceUrl": "https://192.168.220.100:3000/experience.html?id=1"
   }
 ]

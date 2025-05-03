@@ -8,15 +8,23 @@ async function generateQRCode(experienceId, baseUrl, outputPath) {
         const secureBaseUrl = baseUrl.replace('http://', 'https://');
         const experienceUrl = `${secureBaseUrl}/experience.html?id=${experienceId}`;
         
+        // Generate QR code with optimized settings for better scanning
         await QRCode.toFile(outputPath, experienceUrl, {
-            errorCorrectionLevel: 'H',
-            margin: 1,
-            width: 400,
+            errorCorrectionLevel: 'L', // Lower error correction for clearer pattern
+            margin: 4, // Standard margin for better scanning
+            width: 1024, // Larger size for better resolution
             color: {
                 dark: '#000000',
                 light: '#ffffff'
+            },
+            rendererOpts: {
+                quality: 1.0,
+                deflateLevel: 9,
+                deflateStrategy: 3
             }
         });
+
+        return experienceUrl;
     } catch (error) {
         console.error('Error generating QR code:', error);
         throw error;
