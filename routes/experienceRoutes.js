@@ -60,9 +60,17 @@ router.post('/', auth, upload.single('model'), async (req, res) => {
             }
         });
 
-        // Generate QR code with proper port
-        const port = process.env.PORT || 3000; // Get port from environment or use default
-        const baseUrl = `https://${req.hostname}:${port}`;
+        // Generate QR code with proper base URL
+        let baseUrl;
+        if (process.env.NODE_ENV === 'production') {
+            // In production, use the host without port
+            baseUrl = `https://${req.headers.host.split(':')[0]}`;
+        } else {
+            // In development, use the port
+            const port = process.env.PORT || 3000;
+            baseUrl = `https://${req.headers.host.split(':')[0]}:${port}`;
+        }
+
         const qrCodeFileName = `qr-${experience.id}.png`;
         const qrCodePath = `/uploads/qr/${qrCodeFileName}`;
         const qrCodeFullPath = path.join(__dirname, '../uploads/qr', qrCodeFileName);

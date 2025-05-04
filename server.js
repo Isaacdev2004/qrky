@@ -8,6 +8,9 @@ const experienceRoutes = require('./routes/experienceRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const ensureDirectories = require('./utils/ensureDirectories');
 
+// Set NODE_ENV to 'production' if not set
+process.env.NODE_ENV = process.env.NODE_ENV || 'production';
+
 const app = express();
 
 // Middleware
@@ -22,6 +25,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Log the upload path for debugging
 console.log('Upload directory path:', path.join(__dirname, 'uploads'));
+console.log('Environment:', process.env.NODE_ENV);
 
 // Routes
 app.use('/api/users', userRoutes);
@@ -42,12 +46,17 @@ async function initializeApp() {
 initializeApp();
 
 // For local development
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV === 'development') {
     const port = process.env.PORT || 3000;
     app.listen(port, () => {
         console.log(`Development server running on port ${port}`);
     });
+} else {
+    // Production
+    const port = process.env.PORT || 3000;
+    app.listen(port, () => {
+        console.log(`Production server running on port ${port}`);
+    });
 }
 
-// Export for Vercel
 module.exports = app; 
