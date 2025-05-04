@@ -4,7 +4,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>AR Experience Viewer - QRKY</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script>
+        AFRAME.registerComponent('qrmarker-handler', {
+            init: function () {
+                const marker = this.el;
+                marker.addEventListener('markerFound', () => {
+                    console.log('QR marker found');
+                    document.querySelector('.ar-instructions').style.display = 'none';
+                });
+                marker.addEventListener('markerLost', () => {
+                    console.log('QR marker lost');
+                    document.querySelector('.ar-instructions').style.display = 'block';
+                });
+            }
+        });
+    </script>
     <style>
         body {
             margin: 0;
@@ -95,23 +110,16 @@
         embedded
         vr-mode-ui="enabled: false"
         renderer="logarithmicDepthBuffer: true; precision: medium; antialias: true;"
-        arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;">
+        arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;">
 
-        <a-nft
-            id="nft-marker"
-            type="nft"
-            smooth="true"
-            smoothCount="10"
-            smoothTolerance="0.01"
-            smoothThreshold="5">
-            
+        <a-marker id="qr-marker" type="barcode" value-id="1" qrmarker-handler>
             <a-entity
                 id="model-entity"
-                position="0 0 0"
+                position="0 0.5 0"
                 rotation="-90 0 0"
                 scale="0.5 0.5 0.5">
             </a-entity>
-        </a-nft>
+        </a-marker>
 
         <a-entity camera></a-entity>
     </a-scene>
@@ -168,11 +176,6 @@
                 const response = await fetch(`/api/experiences/${experienceId}`);
                 if (!response.ok) throw new Error('Failed to load experience');
                 const experience = await response.json();
-
-                // Set up NFT marker
-                const nftMarker = document.getElementById('nft-marker');
-                const qrPath = experience.qrCodePath.replace('.png', '');
-                nftMarker.setAttribute('url', qrPath);
 
                 // Set up the model
                 const modelEntity = document.getElementById('model-entity');
