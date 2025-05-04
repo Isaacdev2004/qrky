@@ -38,9 +38,30 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .ar-instructions {
+        .ar-controls {
             position: fixed;
             bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+        .ar-button {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-family: Arial, sans-serif;
+            cursor: pointer;
+        }
+        .ar-button:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
+        .ar-instructions {
+            position: fixed;
+            top: 20px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.7);
@@ -49,19 +70,6 @@
             border-radius: 20px;
             font-family: Arial, sans-serif;
             text-align: center;
-            z-index: 1000;
-            max-width: 80%;
-        }
-        .download-marker {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #3498db;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 10px;
-            text-decoration: none;
-            font-family: Arial, sans-serif;
             z-index: 1000;
         }
     </style>
@@ -72,37 +80,95 @@
         <div id="loadingText">Loading AR Experience...</div>
     </div>
 
-    <a href="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/HIRO.jpg" 
-       download="hiro-marker.jpg" 
-       class="download-marker">
-        Download Hiro Marker
-    </a>
-
     <div class="ar-instructions">
-        1. Download the Hiro marker<br>
-        2. Display it on another screen or print it<br>
-        3. Point your camera at the Hiro marker to see the 3D model
+        Move your phone to place the 3D model
+    </div>
+
+    <div class="ar-controls">
+        <button class="ar-button" onclick="moveLeft()">←</button>
+        <button class="ar-button" onclick="moveForward()">↑</button>
+        <button class="ar-button" onclick="moveBackward()">↓</button>
+        <button class="ar-button" onclick="moveRight()">→</button>
+        <button class="ar-button" onclick="rotateLeft()">↺</button>
+        <button class="ar-button" onclick="rotateRight()">↻</button>
+        <button class="ar-button" onclick="scaleUp()">+</button>
+        <button class="ar-button" onclick="scaleDown()">-</button>
     </div>
 
     <a-scene
         embedded
-        arjs='sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; sourceWidth: 1280; sourceHeight: 960; displayWidth: 1280; displayHeight: 960;'
+        arjs='sourceType: webcam; debugUIEnabled: false; sourceWidth: 1280; sourceHeight: 960; displayWidth: 1280; displayHeight: 960;'
         renderer="logarithmicDepthBuffer: true; precision: medium; antialias: true;"
         vr-mode-ui="enabled: false">
 
-        <a-marker preset="hiro">
-            <a-entity
-                id="model-entity"
-                position="0 0.5 0"
-                rotation="-90 0 0"
-                scale="0.5 0.5 0.5">
-            </a-entity>
-        </a-marker>
+        <a-entity id="model-entity"
+                  position="0 0 -2"
+                  rotation="-90 0 0"
+                  scale="0.5 0.5 0.5">
+        </a-entity>
 
-        <a-entity camera></a-entity>
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
     </a-scene>
 
     <script>
+        let currentPosition = { x: 0, y: 0, z: -2 };
+        let currentRotation = { x: -90, y: 0, z: 0 };
+        let currentScale = { x: 0.5, y: 0.5, z: 0.5 };
+        const MOVE_DISTANCE = 0.1;
+        const ROTATION_ANGLE = 15;
+        const SCALE_FACTOR = 1.2;
+
+        function updateModel() {
+            const model = document.getElementById('model-entity');
+            model.setAttribute('position', `${currentPosition.x} ${currentPosition.y} ${currentPosition.z}`);
+            model.setAttribute('rotation', `${currentRotation.x} ${currentRotation.y} ${currentRotation.z}`);
+            model.setAttribute('scale', `${currentScale.x} ${currentScale.y} ${currentScale.z}`);
+        }
+
+        function moveLeft() {
+            currentPosition.x -= MOVE_DISTANCE;
+            updateModel();
+        }
+
+        function moveRight() {
+            currentPosition.x += MOVE_DISTANCE;
+            updateModel();
+        }
+
+        function moveForward() {
+            currentPosition.z -= MOVE_DISTANCE;
+            updateModel();
+        }
+
+        function moveBackward() {
+            currentPosition.z += MOVE_DISTANCE;
+            updateModel();
+        }
+
+        function rotateLeft() {
+            currentRotation.y -= ROTATION_ANGLE;
+            updateModel();
+        }
+
+        function rotateRight() {
+            currentRotation.y += ROTATION_ANGLE;
+            updateModel();
+        }
+
+        function scaleUp() {
+            currentScale.x *= SCALE_FACTOR;
+            currentScale.y *= SCALE_FACTOR;
+            currentScale.z *= SCALE_FACTOR;
+            updateModel();
+        }
+
+        function scaleDown() {
+            currentScale.x /= SCALE_FACTOR;
+            currentScale.y /= SCALE_FACTOR;
+            currentScale.z /= SCALE_FACTOR;
+            updateModel();
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             const loadingScreen = document.getElementById('loadingScreen');
             const loadingText = document.getElementById('loadingText');
@@ -124,12 +190,21 @@
                 const modelEntity = document.getElementById('model-entity');
                 modelEntity.setAttribute('gltf-model', experience.modelPath);
 
-                // Apply settings if they exist
+                // Apply initial settings if they exist
                 if (experience.settings) {
                     const { scale, rotation, position } = experience.settings;
-                    if (scale) modelEntity.setAttribute('scale', `${scale.x} ${scale.y} ${scale.z}`);
-                    if (rotation) modelEntity.setAttribute('rotation', `${rotation.x} ${rotation.y} ${rotation.z}`);
-                    if (position) modelEntity.setAttribute('position', `${position.x} ${position.y} ${position.z}`);
+                    if (scale) {
+                        currentScale = scale;
+                        modelEntity.setAttribute('scale', `${scale.x} ${scale.y} ${scale.z}`);
+                    }
+                    if (rotation) {
+                        currentRotation = rotation;
+                        modelEntity.setAttribute('rotation', `${rotation.x} ${rotation.y} ${rotation.z}`);
+                    }
+                    if (position) {
+                        currentPosition = position;
+                        modelEntity.setAttribute('position', `${position.x} ${position.y} ${position.z}`);
+                    }
                 }
 
                 // Hide loading screen when model is ready
