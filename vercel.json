@@ -16,6 +16,10 @@
             "dest": "server.js"
         },
         {
+            "src": "/uploads/(.*)",
+            "dest": "server.js"
+        },
+        {
             "src": "/(.*)",
             "dest": "frontend/public/$1"
         }

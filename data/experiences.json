@@ -1,9 +1,9 @@
 [
   {
     "userId": 1,
-    "title": "good model",
-    "description": "good",
-    "modelPath": "/uploads/models/model-1746309034119-174795539.glb",
+    "title": "models",
+    "description": "",
+    "modelPath": "/uploads/models/model-1746346469541-783256718.glb",
     "settings": {
       "scale": {
         "x": 1,
@@ -22,7 +22,7 @@
       }
     },
     "id": 1,
-    "createdAt": "2025-05-03T21:50:34.131Z",
+    "createdAt": "2025-05-04T08:14:29.552Z",
     "qrCodePath": "/uploads/qr/qr-1.png",
     "experienceUrl": "https://192.168.220.100:3000/experience.html?id=1"
   }

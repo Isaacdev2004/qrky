@@ -38,6 +38,32 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .ar-instructions {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            z-index: 1000;
+            max-width: 80%;
+        }
+        .download-marker {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-family: Arial, sans-serif;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
@@ -46,18 +72,30 @@
         <div id="loadingText">Loading AR Experience...</div>
     </div>
 
+    <a href="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/HIRO.jpg" 
+       download="hiro-marker.jpg" 
+       class="download-marker">
+        Download Hiro Marker
+    </a>
+
+    <div class="ar-instructions">
+        1. Download the Hiro marker<br>
+        2. Display it on another screen or print it<br>
+        3. Point your camera at the Hiro marker to see the 3D model
+    </div>
+
     <a-scene
         embedded
-        arjs='sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; patternRatio: 0.75;'
-        renderer="logarithmicDepthBuffer: true;"
+        arjs='sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; sourceWidth: 1280; sourceHeight: 960; displayWidth: 1280; displayHeight: 960;'
+        renderer="logarithmicDepthBuffer: true; precision: medium; antialias: true;"
         vr-mode-ui="enabled: false">
 
-        <a-marker type='barcode' value='1'>
+        <a-marker preset="hiro">
             <a-entity
                 id="model-entity"
-                position="0 0 0"
-                rotation="0 0 0"
-                scale="1 1 1">
+                position="0 0.5 0"
+                rotation="-90 0 0"
+                scale="0.5 0.5 0.5">
             </a-entity>
         </a-marker>
 
