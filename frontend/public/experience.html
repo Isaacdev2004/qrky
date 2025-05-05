@@ -6,15 +6,15 @@
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <script>
-        AFRAME.registerComponent('qrmarker-handler', {
+        AFRAME.registerComponent('marker-handler', {
             init: function () {
                 const marker = this.el;
                 marker.addEventListener('markerFound', () => {
-                    console.log('QR marker found');
+                    console.log('Marker found');
                     document.querySelector('.ar-instructions').style.display = 'none';
                 });
                 marker.addEventListener('markerLost', () => {
-                    console.log('QR marker lost');
+                    console.log('Marker lost');
                     document.querySelector('.ar-instructions').style.display = 'block';
                 });
             }
@@ -110,9 +110,9 @@
         embedded
         vr-mode-ui="enabled: false"
         renderer="logarithmicDepthBuffer: true; precision: medium; antialias: true;"
-        arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;">
+        arjs="sourceType: webcam; debugUIEnabled: false; patternRatio: 0.75;">
 
-        <a-marker id="qr-marker" type="barcode" value-id="1" qrmarker-handler>
+        <a-marker id="ar-marker" type="pattern" preset="custom" marker-handler>
             <a-entity
                 id="model-entity"
                 position="0 0.5 0"
@@ -176,6 +176,10 @@
                 const response = await fetch(`/api/experiences/${experienceId}`);
                 if (!response.ok) throw new Error('Failed to load experience');
                 const experience = await response.json();
+
+                // Set up the marker pattern
+                const marker = document.getElementById('ar-marker');
+                marker.setAttribute('url', experience.patternPath);
 
                 // Set up the model
                 const modelEntity = document.getElementById('model-entity');
