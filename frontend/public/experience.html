@@ -151,6 +151,10 @@
             const loadingText = document.getElementById('loadingText');
             
             try {
+                // Add debugging
+                console.log('Experience loading started');
+                loadingText.textContent = 'Loading AR Experience...';
+                
                 const urlParams = new URLSearchParams(window.location.search);
                 const experienceId = urlParams.get('id');
                 
@@ -158,13 +162,36 @@
                     throw new Error('No experience ID provided');
                 }
 
+                console.log('Fetching experience data for ID:', experienceId);
+                loadingText.textContent = 'Fetching experience data...';
+                
                 // Fetch experience data
                 const response = await fetch(`/api/experiences/${experienceId}`);
                 if (!response.ok) throw new Error('Failed to load experience');
                 const experience = await response.json();
+                
+                console.log('Experience data loaded:', experience);
+                loadingText.textContent = 'Loading 3D model...';
 
                 // Set up the model
                 const modelEntity = document.getElementById('model-entity');
+                
+                // Add error event listener before setting the model to catch all errors
+                modelEntity.addEventListener('model-error', (error) => {
+                    console.error('Model Error:', error);
+                    loadingText.textContent = 'Error loading 3D model. Please check console for details.';
+                });
+                
+                // Add model-loaded listener before setting the model
+                modelEntity.addEventListener('model-loaded', () => {
+                    console.log('Model loaded successfully');
+                    loadingScreen.style.display = 'none';
+                });
+                
+                // Log the model path for debugging
+                console.log('Loading model from path:', experience.modelPath);
+                
+                // Set the model path
                 modelEntity.setAttribute('gltf-model', experience.modelPath);
 
                 // Apply settings if they exist
@@ -175,19 +202,21 @@
                     if (position) modelEntity.setAttribute('position', `${position.x} ${position.y} ${position.z}`);
                 }
 
-                // Hide loading screen when model is ready
-                modelEntity.addEventListener('model-loaded', () => {
-                    loadingScreen.style.display = 'none';
-                });
-
-                // Handle model loading error
-                modelEntity.addEventListener('model-error', (error) => {
-                    console.error('Model Error:', error);
-                    loadingText.textContent = 'Error loading 3D model. Please try again.';
-                });
+                // Add timeout to detect if model is taking too long to load
+                const timeout = setTimeout(() => {
+                    if (loadingScreen.style.display !== 'none') {
+                        console.warn('Model loading timeout - may be stuck');
+                        loadingText.textContent = 'Loading taking longer than expected. Trying to continue...';
+                        
+                        // Force hide loading screen after 20 seconds
+                        setTimeout(() => {
+                            loadingScreen.style.display = 'none';
+                        }, 5000);
+                    }
+                }, 15000); // 15 second timeout
 
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Error in AR experience:', error);
                 loadingText.textContent = `Error: ${error.message}. Please refresh the page.`;
             }
         });
