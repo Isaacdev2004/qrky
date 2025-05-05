@@ -6,7 +6,8 @@ async function ensureDirectories() {
     const directories = [
         'uploads',
         'uploads/models',
-        'uploads/qr'
+        'uploads/qr',
+        'uploads/patterns'
     ];
 
     for (const dir of directories) {

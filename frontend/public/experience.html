@@ -5,21 +5,6 @@
     <title>AR Experience Viewer - QRKY</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <script>
-        AFRAME.registerComponent('marker-handler', {
-            init: function () {
-                const marker = this.el;
-                marker.addEventListener('markerFound', () => {
-                    console.log('Marker found');
-                    document.querySelector('.ar-instructions').style.display = 'none';
-                });
-                marker.addEventListener('markerLost', () => {
-                    console.log('Marker lost');
-                    document.querySelector('.ar-instructions').style.display = 'block';
-                });
-            }
-        });
-    </script>
     <style>
         body {
             margin: 0;
@@ -53,30 +38,9 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .ar-controls {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
-            z-index: 1000;
-        }
-        .ar-button {
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-family: Arial, sans-serif;
-            cursor: pointer;
-        }
-        .ar-button:hover {
-            background: rgba(0, 0, 0, 0.9);
-        }
         .ar-instructions {
             position: fixed;
-            top: 20px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.7);
@@ -85,6 +49,19 @@
             border-radius: 20px;
             font-family: Arial, sans-serif;
             text-align: center;
+            z-index: 1000;
+            max-width: 80%;
+        }
+        .download-marker {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-family: Arial, sans-serif;
             z-index: 1000;
         }
     </style>
@@ -95,24 +72,25 @@
         <div id="loadingText">Loading AR Experience...</div>
     </div>
 
-    <div class="ar-instructions">
-        Point your camera at the QR code to see the 3D model
-    </div>
+    <a href="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/HIRO.jpg" 
+       download="hiro-marker.jpg" 
+       class="download-marker">
+        Download Hiro Marker
+    </a>
 
-    <div class="ar-controls">
-        <button class="ar-button" onclick="scaleUp()">+</button>
-        <button class="ar-button" onclick="scaleDown()">-</button>
-        <button class="ar-button" onclick="rotateLeft()">↺</button>
-        <button class="ar-button" onclick="rotateRight()">↻</button>
+    <div class="ar-instructions">
+        1. Download the Hiro marker<br>
+        2. Display it on another screen or print it<br>
+        3. Point your camera at the Hiro marker to see the 3D model
     </div>
 
     <a-scene
         embedded
-        vr-mode-ui="enabled: false"
+        arjs='sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; sourceWidth: 1280; sourceHeight: 960; displayWidth: 1280; displayHeight: 960;'
         renderer="logarithmicDepthBuffer: true; precision: medium; antialias: true;"
-        arjs="sourceType: webcam; debugUIEnabled: false; patternRatio: 0.75;">
+        vr-mode-ui="enabled: false">
 
-        <a-marker id="ar-marker" type="pattern" preset="custom" marker-handler>
+        <a-marker preset="hiro">
             <a-entity
                 id="model-entity"
                 position="0 0.5 0"
@@ -125,41 +103,6 @@
     </a-scene>
 
     <script>
-        let currentRotation = { x: -90, y: 0, z: 0 };
-        let currentScale = { x: 0.5, y: 0.5, z: 0.5 };
-        const ROTATION_ANGLE = 15;
-        const SCALE_FACTOR = 1.2;
-
-        function updateModel() {
-            const model = document.getElementById('model-entity');
-            model.setAttribute('rotation', `${currentRotation.x} ${currentRotation.y} ${currentRotation.z}`);
-            model.setAttribute('scale', `${currentScale.x} ${currentScale.y} ${currentScale.z}`);
-        }
-
-        function rotateLeft() {
-            currentRotation.y -= ROTATION_ANGLE;
-            updateModel();
-        }
-
-        function rotateRight() {
-            currentRotation.y += ROTATION_ANGLE;
-            updateModel();
-        }
-
-        function scaleUp() {
-            currentScale.x *= SCALE_FACTOR;
-            currentScale.y *= SCALE_FACTOR;
-            currentScale.z *= SCALE_FACTOR;
-            updateModel();
-        }
-
-        function scaleDown() {
-            currentScale.x /= SCALE_FACTOR;
-            currentScale.y /= SCALE_FACTOR;
-            currentScale.z /= SCALE_FACTOR;
-            updateModel();
-        }
-
         document.addEventListener('DOMContentLoaded', async () => {
             const loadingScreen = document.getElementById('loadingScreen');
             const loadingText = document.getElementById('loadingText');
@@ -177,25 +120,16 @@
                 if (!response.ok) throw new Error('Failed to load experience');
                 const experience = await response.json();
 
-                // Set up the marker pattern
-                const marker = document.getElementById('ar-marker');
-                marker.setAttribute('url', experience.patternPath);
-
                 // Set up the model
                 const modelEntity = document.getElementById('model-entity');
                 modelEntity.setAttribute('gltf-model', experience.modelPath);
 
-                // Apply initial settings if they exist
+                // Apply settings if they exist
                 if (experience.settings) {
-                    const { scale, rotation } = experience.settings;
-                    if (scale) {
-                        currentScale = scale;
-                        modelEntity.setAttribute('scale', `${scale.x} ${scale.y} ${scale.z}`);
-                    }
-                    if (rotation) {
-                        currentRotation = rotation;
-                        modelEntity.setAttribute('rotation', `${rotation.x} ${rotation.y} ${rotation.z}`);
-                    }
+                    const { scale, rotation, position } = experience.settings;
+                    if (scale) modelEntity.setAttribute('scale', `${scale.x} ${scale.y} ${scale.z}`);
+                    if (rotation) modelEntity.setAttribute('rotation', `${rotation.x} ${rotation.y} ${rotation.z}`);
+                    if (position) modelEntity.setAttribute('position', `${position.x} ${position.y} ${position.z}`);
                 }
 
                 // Hide loading screen when model is ready
