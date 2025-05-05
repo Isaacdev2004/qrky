@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <title>AR Experience Viewer - QRKY</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
@@ -64,7 +64,46 @@
             font-family: Arial, sans-serif;
             z-index: 1000;
         }
+        /* Device-specific adjustments */
+        .android-notice {
+            display: none;
+            position: fixed;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 87, 34, 0.8);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            z-index: 1000;
+        }
     </style>
+    <script>
+        // Detect if the user is on Android
+        document.addEventListener('DOMContentLoaded', function() {
+            const isAndroid = /Android/i.test(navigator.userAgent);
+            if (isAndroid) {
+                document.querySelector('.android-notice').style.display = 'block';
+            }
+        });
+
+        // Fix for AR.js camera on Android
+        window.addEventListener('arjs-video-loaded', () => {
+            // For Android: Improve camera settings for better field of view
+            const isAndroid = /Android/i.test(navigator.userAgent);
+            if (isAndroid) {
+                const video = document.querySelector('.a-canvas').parentNode.querySelector('video');
+                if (video) {
+                    // Try to override the zoom with video settings
+                    video.style.objectFit = 'cover';
+                    video.style.width = '100vw';
+                    video.style.height = '100vh';
+                }
+            }
+        });
+    </script>
 </head>
 <body>
     <div id="loadingScreen" class="loading-screen">
@@ -84,13 +123,19 @@
         3. Point your camera at the Hiro marker to see the 3D model
     </div>
 
+    <div class="android-notice">
+        If camera is zoomed in, try stepping back from the marker
+    </div>
+
     <a-scene
         embedded
-        arjs='sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; sourceWidth: 1280; sourceHeight: 960; displayWidth: 1280; displayHeight: 960;'
+        arjs='sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; sourceWidth: 1280; sourceHeight: 960; displayWidth: 1280; displayHeight: 960; cameraParametersUrl: camera_para.dat;'
         renderer="logarithmicDepthBuffer: true; precision: medium; antialias: true;"
         vr-mode-ui="enabled: false">
 
-        <a-marker preset="hiro">
+        <a-entity camera id="camera" position="0 0 0" look-controls="enabled: false"></a-entity>
+        
+        <a-marker preset="hiro" smooth="true" smoothCount="10" smoothTolerance="0.01" smoothThreshold="5">
             <a-entity
                 id="model-entity"
                 position="0 0.5 0"
@@ -98,8 +143,6 @@
                 scale="0.5 0.5 0.5">
             </a-entity>
         </a-marker>
-
-        <a-entity camera></a-entity>
     </a-scene>
 
     <script>
